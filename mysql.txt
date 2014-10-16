@@ -1,0 +1,21 @@
+install mysql on EC2 instance. 
+
+ssh -i ~/bgannico_west.pem ubuntu@
+
+scp -i ~/bgannico_west.pem <file> ubuntu@<dns>:~
+
+step 1: mount db volume
+step 2: start mysql server
+step 3: start frontend server
+
+(as root)
+
+mount /dev/xvdb /storage/ebs
+
+//cd /storage/ebs
+chown mysql:mysql /storage/ebs
+
+cd ~/
+service mysql stop
+mount --bind /storage/ebs /var/lib/mysql
+service mysql start

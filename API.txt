@@ -1,0 +1,31 @@
+
+Android app needs to be able to upload a reading (in JSON) every minute or so
+Alternatively, it may wish to bulk upload a large set of readings.
+
+"readings":[
+	{"timestamp":"10-19-14Z21:40:09", "lat":"70.009881", "lon":"30.112378", "co":"3", "pm":"2.4", hum:"6.88", "temp": "30"},
+	{},
+]
+
+POST
+endpoint:port/upload
+
+payload: json {"readings":[...]}
+
+- all readings between a start and end point
+start and end points defined as timestamps. Thus, 10-10-14 12:01 - 10-10-14 12:15 would return 14 minutes of readings from 10-10-14
+- all readings within an area, defined as a square with two points
+bottomLeft and topLeft are both lat/lon coordinate pairs
+- A combination of the above
+
+Machine Learning and Visualization both need to grab the data
+
+Visualization will likely want the data in JSON, but Machine Learning might need some other format
+	perhaps a format param (json, csv, etc?)
+
+GET
+endpoint:port/query?timeStart=0-0-00Z00:00&timeEnd=0-0-00Z00:00
+endpoint:port/query?bottomLeft=000.000000Z000.000000&topLeft=000.000000Z000.000000
+endpoint:port/query?bottomLeft=000.000000Z000.000000&topLeft=000.000000Z000.000000&timeStart=0-0-00Z00:00&timeEnd=0-0-00Z00:00
+
+returns json{"readings":[...]}

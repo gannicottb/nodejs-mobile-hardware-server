@@ -1,5 +1,6 @@
 /*
 Author: Brandon Gannicott
+Date: 10/16/14
 */
 
 var restify = require('restify');
@@ -19,23 +20,43 @@ server
 	.use(restify.fullResponse())
 	.use(restify.bodyParser())
 
+//
+// HTTP Handlers
+//
+
 server.get('/test', function(req, res, next){
 	pool.query('SELECT text FROM test', function(err, rows, fields){
 		if (err) throw err;
-
-		console.log(rows);
-		res.send("No Error!")
+		
+		res.send(rows);
 
 		return next();
-	})
-})
+	});
+});
+
+server.get('/all', function(req, res, next){
+	pool.query('SELECT * FROM readings', function(err, rows, fields){
+		if (err) throw err;
+	
+		res.send(rows);
+
+		return next();
+	});
+});
 
 server.post('/upload', function(req, res, next){
 	var body = JSON.parse(req.body)
-	console.log(body.title)
+	//body has the properties of the reading
+	pool.query('INSERT INTO readings SET ?', body, function(err, result){
+		if (err) throw err;
 
-	return next();
-})
+		res.send(result);
+
+		return next();
+	});	
+});
+
+// Listen for requests
 
 server.listen(3000, function(){
 	console.log('%s listening at %s', server.name, server.url);	
