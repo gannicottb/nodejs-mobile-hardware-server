@@ -55,6 +55,8 @@ server.get('/all', function(req, res, next){
 endpoint:port/q?timeStart=0-0-00Z00:00&timeEnd=0-0-00Z00:00
 endpoint:port/q?bottomLeft=000.000000Z000.000000&topLeft=000.000000Z000.000000
 endpoint:port/q?bottomLeft=000.000000Z000.000000&topLeft=000.000000Z000.000000&timeStart=0-0-00Z00:00&timeEnd=0-0-00Z00:00
+example
+endpoint:port/q?bottomLeft=69.000Z29.000&topRight=71.000Z31.000&timeStart='2014-10-15'&timeEnd='2014-10-17'
 */
 server.get('/q', function(req, res, next){
 	var stmt = "SELECT * FROM readings WHERE ";
@@ -64,7 +66,7 @@ server.get('/q', function(req, res, next){
 	
 	// Add time interval condition if present in params
 	if(query.hasOwnProperty('timeStart') && query.hasOwnProperty('timeEnd')){
-		conditions.push(sprintf("(ts BETWEEN %s AND %s)", query.timeStart, query.timeEnd));
+		conditions.push(sprintf("(ts BETWEEN '%s' AND '%s')", query.timeStart, query.timeEnd));
 		console.log(conditions);	
 	}
 
