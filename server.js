@@ -1,6 +1,9 @@
 /*
 Author: Brandon Gannicott
 Date: 10/16/14
+Version: 0.1.2
+Changelog:
+10/22: Added /nuke/:table. Upload expects an array of readings. Will work for any number of readings in any state of completeness
 */
 
 // Requires
@@ -10,6 +13,9 @@ var mysql = require('mysql');
 var url = require('url');
 var sprintf = require("sprintf-js").sprintf,
     vsprintf = require("sprintf-js").vsprintf
+
+// Globals
+var keys = ['ts','lat','lon','cp','pm','hum','temp'];
 
 // Server config
 
@@ -30,34 +36,29 @@ server
 //
 // HTTP Handlers
 //
-
-server.get('/test', function(req, res, next){
-	pool.query('SELECT text FROM test', function(err, rows, fields){
-		if (err) throw err;
-		
-		res.send(rows);
-
-		return next();
-	});
+server.get('/all', function(req, res, next){
+	queryAndReturn("SELECT * FROM readings", res, next);
 });
 
-server.get('/all', function(req, res, next){
-	pool.query('SELECT * FROM readings', function(err, rows, fields){
-		if (err) throw err;
-	
-		res.send(rows);
+server.get('/id/:id', function(req, res, next){
+	queryAndReturn("SELECT * from readings WHERE id ="+req.params.id, res, next);
+});
 
-		return next();
-	});
+//This is the killswitch to easily dump crap debugging data
+server.get('/nuke/:table', function(req, res, next){
+	var stmt = "DELETE FROM "+req.params.table;
+	queryAndReturn(stmt, res, next);
 });
 
 /*
 endpoint:port/q?timeStart=0-0-00Z00:00&timeEnd=0-0-00Z00:00
 endpoint:port/q?bottomLeft=000.000000Z000.000000&topLeft=000.000000Z000.000000
 endpoint:port/q?bottomLeft=000.000000Z000.000000&topLeft=000.000000Z000.000000&timeStart=0-0-00Z00:00&timeEnd=0-0-00Z00:00
-example
-endpoint:port/q?bottomLeft=69.000Z29.000&topRight=71.000Z31.000&timeStart='2014-10-15'&timeEnd='2014-10-17'
+
+example vv
+endpoint:port/q?bottomLeft=69.000Z29.000&topRight=71.000Z31.000&timeStart=2014-10-15&timeEnd=2014-10-17
 */
+
 server.get('/q', function(req, res, next){
 	var stmt = "SELECT * FROM readings WHERE ";
 	var conditions = [];
@@ -87,25 +88,9 @@ server.get('/q', function(req, res, next){
 	console.log(stmt);
 
 	//Run the query for the prepared statement
-	pool.query(stmt, function(err, rows, fields){
-		if(err) throw err;
-
-		res.send(rows);
-
-		return next();
-	});
+	queryAndReturn(stmt, res, next);
 
 })
-
-/*
-	convenience queries:
-	all readings for month m
-	all readings for week w
-	all readings for day d
-	all readings for hour h
-	all readings since DATETIME dt
-	all 
-*/
 
 /* 
   Upload filtering? How to aggregate incoming readings? 
@@ -115,10 +100,22 @@ server.get('/q', function(req, res, next){
   Put them all into a queue and then evaluate as a batch?
 */
 server.post('/upload', function(req, res, next){
-	var body = JSON.parse(req.body)
-	//body has the properties of the reading
-	pool.query('INSERT INTO readings SET ?', body, function(err, result){
-		if (err) throw err;
+	var body = JSON.parse(req.body);
+
+	if(!body.hasOwnProperty('readings')){
+		return next(new restify.InvalidArgumentError("The upload should contain an array of readings with the key readings"));
+	}
+
+	stmt = "INSERT INTO readings (ts, lat, lon, co, pm, hum, temp) VALUES ?";
+	values = [];
+	body.readings.map(function(o){
+		values.push(valuesArray(o));
+	});
+
+	console.log(values);
+	
+	pool.query(stmt, [values], function(err, result){
+		if (err) return next(err);
 
 		res.send(result);
 
@@ -128,9 +125,26 @@ server.post('/upload', function(req, res, next){
 
 // Utility functions
 
+var queryAndReturn = function(stmt, res, next){
+	pool.query(stmt, function(err, rows, fields){
+		if(err) 
+			return next(err);
+		res.send(rows);
+		return next();
+	});
+};
+
 var coords = function(array){
 	return {lon: array[0], lat: array[1]}
-}
+};
+
+var valuesArray = function(obj){
+	var val = []
+    keys.map(function(key){
+        val.push(obj[key]);
+    })
+	return val;
+};
 
 // Listen for requests
 
