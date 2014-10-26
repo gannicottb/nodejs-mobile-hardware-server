@@ -15,7 +15,7 @@ var sprintf = require("sprintf-js").sprintf,
     vsprintf = require("sprintf-js").vsprintf
 
 // Globals
-var keys = ['ts','lat','lon','cp','pm','hum','temp','elev','wind','precip'];
+var keys = ['ts','lat','lon','co','pm','hum','temp','elev','wind','precip'];
 
 // Server config
 
