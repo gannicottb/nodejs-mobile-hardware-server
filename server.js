@@ -102,7 +102,7 @@ server.get('/q', function(req, res, next){
 */
 server.post('/upload', function(req, res, next){
 	var body = JSON.parse(req.body);
-
+	console.log(body);
 	if(!body.hasOwnProperty('readings')){
 		return next(new restify.InvalidArgumentError("The upload should contain an array of readings with the key readings"));
 	}
