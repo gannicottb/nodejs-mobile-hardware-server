@@ -15,7 +15,7 @@ var sprintf = require("sprintf-js").sprintf,
     vsprintf = require("sprintf-js").vsprintf
 
 // Globals
-var keys = ['ts','lat','lon','cp','pm','hum','temp'];
+var keys = ['ts','lat','lon','cp','pm','hum','temp','elev','wind','precip'];
 
 // Server config
 
@@ -107,7 +107,7 @@ server.post('/upload', function(req, res, next){
 		return next(new restify.InvalidArgumentError("The upload should contain an array of readings with the key readings"));
 	}
 
-	stmt = "INSERT INTO readings (ts, lat, lon, co, pm, hum, temp, elev, wind, precip) VALUES ?";
+	stmt = "INSERT INTO readings ("+keys.join(", ")+") VALUES ?";
 	values = [];
 	body.readings.map(function(o){
 		values.push(valuesArray(o));
