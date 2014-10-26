@@ -9,3 +9,21 @@ CREATE TABLE readings (
 	temp DECIMAL(5,2),
 	PRIMARY KEY(id)
 );
+
+
+
+ALTER TABLE readings
+  ADD (elev DECIMAL(11,8),
+       wind DECIMAL(5,2),
+       precip DECIMAL(5,2)
+  );
+
+ALTER TABLE readings
+MODIFY COLUMN (lat DECIMAL(11,8),
+			  lon DECIMAL(11,8)
+			  );
+
+
+
+
+display_location.elevation,wind_mph, relative_humidity, precip_today?

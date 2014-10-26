@@ -24,7 +24,8 @@ var pool = mysql.createPool({
 	host : 'ec2-54-183-137-241.us-west-1.compute.amazonaws.com',	
 	user : 'root',
 	password : 'dbpassword',
-	database : 'aq'
+	database : 'aq',
+	timezone : 'utc'
 });
 
 var server = restify.createServer({name: 'sink'});
@@ -106,7 +107,7 @@ server.post('/upload', function(req, res, next){
 		return next(new restify.InvalidArgumentError("The upload should contain an array of readings with the key readings"));
 	}
 
-	stmt = "INSERT INTO readings (ts, lat, lon, co, pm, hum, temp) VALUES ?";
+	stmt = "INSERT INTO readings (ts, lat, lon, co, pm, hum, temp, elev, wind, precip) VALUES ?";
 	values = [];
 	body.readings.map(function(o){
 		values.push(valuesArray(o));
