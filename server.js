@@ -1,13 +1,14 @@
 /*
 Author: Brandon Gannicott
 Date: 10/16/14
-Version: 0.1.2
+Version: 0.1.3
 Changelog:
+10/30: Added AQI calculation for PM2.5 readings (added to each reading object before calling valueArray())
 10/22: Added /nuke/:table. Upload expects an array of readings. Will work for any number of readings in any state of completeness
 */
 
 // Requires
-
+//
 var restify = require('restify');
 var mysql = require('mysql');
 var url = require('url');
@@ -15,10 +16,26 @@ var sprintf = require("sprintf-js").sprintf,
     vsprintf = require("sprintf-js").vsprintf
 
 // Globals
-var keys = ['ts','lat','lon','co','pm','hum','temp','elev','wind','precip'];
+//
+var keys = ['ts','lat','lon','co','pm','hum','temp','elev','wind','precip', 'pm_aqi'];
+var breakpoints = {
+	0.0   : 0,
+	15.4  : 50,
+	40.4  : 51,
+	40.5  : 101,
+	65.4  : 150,
+	65.5  : 151,
+	150.4 : 200,
+	150.5 : 201,
+	250.4 : 300,
+	250.5 : 301,
+	350.4 : 400,
+	350.5 : 401,
+	500.4 : 500
+}
 
 // Server config
-
+//
 var pool = mysql.createPool({
 	connectionLimit : 10,
 	host : 'ec2-54-183-137-241.us-west-1.compute.amazonaws.com',	
@@ -109,8 +126,10 @@ server.post('/upload', function(req, res, next){
 
 	stmt = "INSERT INTO readings ("+keys.join(", ")+") VALUES ?";
 	values = [];
-	body.readings.map(function(o){
-		values.push(valuesArray(o));
+	body.readings.map(function(reading){
+		// calculate the AQI for the pm reading and add it to the reading object
+		reading.pm_aqi = reading.hasOwnProperty('pm') ? aqi(reading.pm) : 0	
+		values.push(valuesArray(reading));
 	});
 
 	console.log(values);
@@ -145,6 +164,28 @@ var valuesArray = function(obj){
         val.push(obj[key]);
     })
 	return val;
+};
+
+/*
+	Converts concentration into AQI as per EPA memoranda EPA-454/B-06-001, May 2006
+*/
+var aqi = function(c){
+	//c = rounded concentration of pm2.5 in ug/m3
+	if(c == 0) return 0;
+
+	var bp_hi, i_hi, bp_lo, i_lo;
+    
+    var bp = Object.keys(breakpoints);
+	bp.some(function(key, index){
+        if (key >= c){
+			bp_hi = key;            
+			i_hi = breakpoints[bp_hi];	
+            bp_lo = bp[Math.max(0,index - 1)];
+            i_lo = breakpoints[bp_lo];
+            return true;
+		}
+	})  
+    return Math.round(((i_hi - i_lo)/(bp_hi - bp_lo)) * (c - bp_lo) + i_lo);	
 };
 
 // Listen for requests

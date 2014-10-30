@@ -24,6 +24,5 @@ MODIFY COLUMN (lat DECIMAL(11,8),
 			  );
 
 
-
-
-display_location.elevation,wind_mph, relative_humidity, precip_today?
+ALTER TABLE readings
+  ADD aqi SMALLINT;
