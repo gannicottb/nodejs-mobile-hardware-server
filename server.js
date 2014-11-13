@@ -1,12 +1,14 @@
 /*
 Author: Brandon Gannicott
 Date: 10/16/14
-Version: 0.1.4
+
 Changelog:
+11/13: Removed 'co' from the list of keys to save to DB
 11/12: Found out that AQI calculation was bugged. Fixed the bug (convert to Number) and added rounding (as per EPA)
 10/30: Added AQI calculation for PM2.5 readings (added to each reading object before calling valueArray())
 10/22: Added /nuke/:table. Upload expects an array of readings. Will work for any number of readings in any state of completeness
 */
+var version = "0.1.4.1";
 
 // Requires
 //
@@ -18,7 +20,7 @@ var sprintf = require("sprintf-js").sprintf,
 
 // Globals
 //
-var keys = ['ts','lat','lon','co','pm','hum','temp','elev','wind','precip', 'pm_aqi'];
+var keys = ['ts','lat','lon','pm','hum','temp','elev','wind','precip', 'pm_aqi'];
 var breakpoints = {
 	0.0   : 0,
 	15.4  : 50,
@@ -35,7 +37,6 @@ var breakpoints = {
 	500.4 : 500
 }
 
-var version = "0.1.4";
 
 // Server config
 //
