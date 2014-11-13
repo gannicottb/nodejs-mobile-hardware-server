@@ -1,7 +1,7 @@
 /*
 Author: Brandon Gannicott
 Date: 10/16/14
-Version: 0.1.3
+Version: 0.1.4
 Changelog:
 11/12: Found out that AQI calculation was bugged. Fixed the bug (convert to Number) and added rounding (as per EPA)
 10/30: Added AQI calculation for PM2.5 readings (added to each reading object before calling valueArray())
@@ -34,6 +34,8 @@ var breakpoints = {
 	350.5 : 401,
 	500.4 : 500
 }
+
+var version = "0.1.4";
 
 // Server config
 //
@@ -193,5 +195,6 @@ var aqi = function(c){
 // Listen for requests
 
 server.listen(8000, function(){
+	console.log("Version:", version);
 	console.log('%s listening at %s', server.name, server.url);	
 })
