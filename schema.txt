@@ -24,5 +24,9 @@ MODIFY COLUMN (lat DECIMAL(11,8),
 			  );
 
 
-ALTER TABLE readings
-  ADD aqi SMALLINT;
+ALTER TABLE readings ADD aqi SMALLINT;
+
+CREATE TABLE backup_one LIKE readings;
+INSERT backup_one SELECT * FROM readings;
+
+ALTER TABLE readings DROP co;

@@ -3,6 +3,7 @@ Author: Brandon Gannicott
 Date: 10/16/14
 Version: 0.1.3
 Changelog:
+11/12: Found out that AQI calculation was bugged. Fixed the bug (convert to Number) and added rounding (as per EPA)
 10/30: Added AQI calculation for PM2.5 readings (added to each reading object before calling valueArray())
 10/22: Added /nuke/:table. Upload expects an array of readings. Will work for any number of readings in any state of completeness
 */
@@ -171,6 +172,7 @@ var valuesArray = function(obj){
 */
 var aqi = function(c){
 	//c = rounded concentration of pm2.5 in ug/m3
+	c = Number(Number(c).toFixed(3));
 	if(c == 0) return 0;
 
 	var bp_hi, i_hi, bp_lo, i_lo;
